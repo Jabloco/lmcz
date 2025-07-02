@@ -1,0 +1,7 @@
+__pycache__/
+env/
+
+*.txt
+*.log
+settings.py
+!requirements.txt
