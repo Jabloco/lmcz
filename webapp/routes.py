@@ -1,9 +1,13 @@
+from flask import render_template
 from webapp import lmcz_app
+
 from settings import DEBUG
 
-@app.route('/')
-def hello_world():
-    return 'Hello World!'
+@lmcz_app.route('/')
+@lmcz_app.route('/index')
+def index():
+    return render_template('index.html', title='Данные о состоянии ЛМЧЗ')
+
 
 if __name__ == '__main__':
     lmcz_app.run(debug=DEBUG)
