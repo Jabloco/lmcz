@@ -3,6 +3,7 @@ from webapp import lmcz_app
 
 from settings import DEBUG
 
+
 @lmcz_app.route('/')
 @lmcz_app.route('/index')
 def index():

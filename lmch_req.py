@@ -68,7 +68,7 @@ def check_update_and_sync(comp_name: str) -> dict | None:
     if status_req_res:
         last_update = datetime.utcfromtimestamp(status_req_res['lastUpdate']/1000).strftime('%Y-%m-%d %H:%M:%S')
         last_sync = datetime.utcfromtimestamp(status_req_res['lastSync']/1000).strftime('%Y-%m-%d %H:%M:%S')
-        update_and_sync = {'update':last_update, 'sync':last_sync}
+        update_and_sync = {'update': last_update, 'sync': last_sync}
         return update_and_sync
     else:
         return
@@ -192,7 +192,7 @@ def check_and_update(comp_name: str) -> dict | None:
 if __name__ == "__main__":
     r = LmczClient()
     clear_log_files()
-    for shop_num in range(2,310):
+    for shop_num in range(2, 310):
         # формируем имя компа
         comp_name = f'mag-{shop_num}-zav.{DOMAIN}'
         print(check_and_update(comp_name))
