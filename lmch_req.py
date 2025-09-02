@@ -89,15 +89,19 @@ def init_lmcz(comp_name: str) -> str | None:
 
     Принимает имя компа
 
-    Возвращает или None или строку
+    Если запрос не выполнен (пришло None) возвращается False
+
+    Если запрос выполнен (status_code == 200) возвращается True
+
+    Во всех других случаях возвращается None
+
     """
     init_req_res = r.lmcz_init_req(comp_name)
 
     if init_req_res is None:
-        print(f"Запрос на инициализацию не отправлен")
+        return False
     elif init_req_res.status_code == 200:
-        print(init_req_res)
-        return (f"Отправлен запрос на инициализацию. Код {init_req_res.status_code}")
+        return True
     else:
         return
 
