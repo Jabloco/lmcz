@@ -1,12 +1,13 @@
 import requests
 import logging
+import os
 from datetime import datetime
 from settings import TOKEN
 from settings import AUTH
 from settings import DOMAIN
 
 
-logging.basicConfig(handlers=[logging.FileHandler('error.log', 'a', 'utf-8')],
+logging.basicConfig(handlers=[logging.FileHandler('error.txt', 'a', 'utf-8')],
                     format='%(levelname)s - %(message)s')
 
 
@@ -33,6 +34,14 @@ class LmczClient:
             logging.exception(error)
             return
         return req
+
+
+def ping_host(comp_name: str) -> bool:
+    result = os.system("ping -c 1 " + comp_name)
+    if result == 0:
+        return True
+    else:
+        return False
 
 
 def check_status_lmcz(comp_name: str) -> str | None:
@@ -114,16 +123,19 @@ def clear_log_files():
                   'log_not_configure',
                   'log_ready',
                   'log_sync_error',
+                  'no_lmcz_hosts',
                   '1.2.0-326',
                   '1.2.1-340',
-                  '1.3.1-369'
+                  '1.3.1-369',
+                  '1.5.0-462',
+                  'error'
                   ]
     for file_name in file_names:
         with open(f"{file_name}.txt", "w"):
             pass
 
 
-def write_lmcz_ver(file_name: str, msg_text: str):
+def write_reults(file_name: str, msg_text: str):
     """
 
     Функция для создания файла с версией ЛМЧЗ в имени и номерами магазинов внутри
@@ -149,33 +161,39 @@ def check_and_update(comp_name: str) -> dict | None:
     # получаем версию модуля
     version = check_version_lmcz(comp_name)
     update_and_sync = check_update_and_sync(comp_name)
+    check_host = ping_host(comp_name)
+
     # обрабатываем возможные ответы
-    if status is None:
-        # если статус не пришел то возвращаем None
-        return
-    elif status == 'ready':
-        msg = f"{comp_name} модуль ЛМЧЗ инициализирован. Статус: {status}. Версия ЛМЧЗ: {version}.\n\
-            \tПоследняя синхронизация {update_and_sync['sync']}. Последняя репликация {update_and_sync['update']}"
-        write_logs(file_name="log_ready", msg_text=f"{msg}\n")
-        write_lmcz_ver(file_name=str(version), msg_text=f"{str(comp_name)} {status}\n")
-    elif status == 'initialization':
-        msg = f"{comp_name} модуль ЛМЧЗ в процессе инициализации. Статус: {status}. Версия ЛМЧЗ: {version}.\n\
-            \tПоследняя синхронизация {update_and_sync['sync']}. Последняя репликация {update_and_sync['update']}"
-        write_logs(file_name="log_initialization", msg_text=f"{msg}\n")
-        write_lmcz_ver(file_name=str(version), msg_text=f"{str(comp_name)} {status}\n")
-    elif status == 'not_configured':
-        msg = f"{comp_name} модуль ЛМЧЗ не инициализирован.Статус: {status}. Версия ЛМЧЗ: {version}.\n\
-            \tПоследняя синхронизация {update_and_sync['sync']}. Последняя репликация {update_and_sync['update']}"
-        write_logs(file_name="log_not_configure", msg_text=f"{msg}\n")
-        write_lmcz_ver(file_name=str(version), msg_text=f"{str(comp_name)} {status}\n")
-        send_init_req = init_lmcz(comp_name)
-    elif status == 'sync_error':
-        msg = f"{comp_name} ошибка синхронизации.Статус: {status}. Версия ЛМЧЗ: {version}.\n\
-            \tПоследняя синхронизация {update_and_sync['sync']}. Последняя репликация {update_and_sync['update']}"
-        write_logs(file_name="log_sync_error", msg_text=f"{msg}\n")
-        write_lmcz_ver(file_name=str(version), msg_text=f"{str(comp_name)} {status}\n")
-        send_init_req = init_lmcz(comp_name)
-        print(send_init_req)
+    if check_host is True:
+        if status is None:
+            # если статус не пришел то пишем в файл и возвращаем None
+            msg = f"{comp_name} отвечает, но ЛМЧЗ не обнаружен"
+            write_reults(file_name="no_lmcz_hosts", msg_text=f"{msg}\n")
+            return
+        elif status == 'ready':
+            msg = f"{comp_name} модуль ЛМЧЗ инициализирован. Статус: {status}. Версия ЛМЧЗ: {version}.\n\
+                \tПоследняя синхронизация {update_and_sync['sync']}. Последняя репликация {update_and_sync['update']}"
+            write_logs(file_name="log_ready", msg_text=f"{msg}\n")
+            write_reults(file_name=str(version), msg_text=f"{str(comp_name)} {status}\n")
+        elif status == 'initialization':
+            msg = f"{comp_name} модуль ЛМЧЗ в процессе инициализации. Статус: {status}. Версия ЛМЧЗ: {version}.\n\
+                \tПоследняя синхронизация {update_and_sync['sync']}. Последняя репликация {update_and_sync['update']}"
+            write_logs(file_name="log_initialization", msg_text=f"{msg}\n")
+            write_reults(file_name=str(version), msg_text=f"{str(comp_name)} {status}\n")
+        elif status == 'not_configured':
+            msg = f"{comp_name} модуль ЛМЧЗ не инициализирован.Статус: {status}. Версия ЛМЧЗ: {version}.\n\
+                \tПоследняя синхронизация {update_and_sync['sync']}. Последняя репликация {update_and_sync['update']}"
+            write_logs(file_name="log_not_configure", msg_text=f"{msg}\n")
+            write_reults(file_name=str(version), msg_text=f"{str(comp_name)} {status}\n")
+            send_init_req = init_lmcz(comp_name)
+        elif status == 'sync_error':
+            msg = f"{comp_name} ошибка синхронизации.Статус: {status}. Версия ЛМЧЗ: {version}.\n\
+                \tПоследняя синхронизация {update_and_sync['sync']}. Последняя репликация {update_and_sync['update']}"
+            write_logs(file_name="log_sync_error", msg_text=f"{msg}\n")
+            write_reults(file_name=str(version), msg_text=f"{str(comp_name)} {status}\n")
+            send_init_req = init_lmcz(comp_name)
+        else:
+            return
     else:
         return
 
