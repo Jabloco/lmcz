@@ -210,7 +210,8 @@ def check_and_update(comp_name: str) -> dict | None:
 if __name__ == "__main__":
     r = LmczClient()
     clear_log_files()
-    for shop_num in range(2, 310):
+    for shop_num in range(2, 315):
         # формируем имя компа
         comp_name = f'mag-{shop_num}-zav.{DOMAIN}'
-        print(check_and_update(comp_name))
+        res = check_and_update(comp_name)
+        print(res)
