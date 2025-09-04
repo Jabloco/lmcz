@@ -89,15 +89,19 @@ def init_lmcz(comp_name: str) -> str | None:
 
     Принимает имя компа
 
-    Возвращает или None или строку
+    Если запрос не выполнен (пришло None) возвращается False
+
+    Если запрос выполнен (status_code == 200) возвращается True
+
+    Во всех других случаях возвращается None
+
     """
     init_req_res = r.lmcz_init_req(comp_name)
 
     if init_req_res is None:
-        print(f"Запрос на инициализацию не отправлен")
+        return False
     elif init_req_res.status_code == 200:
-        print(init_req_res)
-        return (f"Отправлен запрос на инициализацию. Код {init_req_res.status_code}")
+        return True
     else:
         return
 
@@ -210,7 +214,8 @@ def check_and_update(comp_name: str) -> dict | None:
 if __name__ == "__main__":
     r = LmczClient()
     clear_log_files()
-    for shop_num in range(2, 310):
+    for shop_num in range(2, 315):
         # формируем имя компа
         comp_name = f'mag-{shop_num}-zav.{DOMAIN}'
-        print(check_and_update(comp_name))
+        res = check_and_update(comp_name)
+        print(res)
