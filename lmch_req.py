@@ -83,7 +83,7 @@ def check_update_and_sync(comp_name: str) -> dict | None:
         return
 
 
-def init_lmcz(comp_name: str) -> str | None:
+def init_lmcz(comp_name: str) -> bool | None:
     """
     Функция для отправки запроса на инициализацию ЛМЧЗ
 
